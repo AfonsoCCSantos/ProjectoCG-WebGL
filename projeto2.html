@@ -1,0 +1,173 @@
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <script src="D:\FCUL\3Ano\1Semestre\CG\twgl.js-master\dist\5.x\twgl-full.js"></script>
+</head>
+
+<body>
+    <doctype html="">
+        <!--Nuno Garcia, Faculdade de Ciências, Universidade de Lisboa, 2021-->
+        <title>Projeto</title>
+
+        <canvas id="canvas" width: 100vw; height: 100vh; display: block;></canvas>
+        <script id="vs" type="notjs">
+            uniform mat4 u_worldViewProjection;
+            uniform vec4 colours;
+            
+            attribute vec4 position;
+            attribute vec2 texcoord;
+
+            varying vec4 vcolor;
+            varying vec2 v_texCoord;
+            
+            void main() {
+              gl_Position = u_worldViewProjection * position;
+              vcolor = colours;
+              v_texCoord = texcoord;
+            }
+            
+      </script>
+        <script id="fs" type="notjs">
+            precision mediump float;
+            varying vec4 vcolor;
+            varying vec2 v_texCoord;
+            uniform sampler2D textura;
+            
+            void main() {
+             //gl_FragColor = vec4(1, 1, 0, 1);
+            gl_FragColor = texture2D(textura, v_texCoord);
+            }
+      
+      </script>
+        <script>
+            //ADICIONAR O LINK PARA AS TEXTURAS
+            const m4 = twgl.m4;
+            const gl = document.querySelector("canvas").getContext("webgl");
+            const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
+            
+            //const bufferInfo = twgl.primitives.createCylinderBufferInfo(gl, 2, 4, 10, 10);
+            const bufferInfoSun = twgl.primitives.createSphereBufferInfo(gl,1.5, 15, 15);
+            const bufferInfoMercury = twgl.primitives.createSphereBufferInfo(gl,0.2, 15, 15);
+            const bufferInfoVenus = twgl.primitives.createSphereBufferInfo(gl, 0.3, 15, 15);
+            const bufferInfoEarth = twgl.primitives.createSphereBufferInfo(gl, 0.37, 15, 15);
+            const bufferInfoJupiter = twgl.primitives.createSphereBufferInfo(gl, 0.6, 15, 15);
+            const bufferInfoMoon = twgl.primitives.createSphereBufferInfo(gl, 0.05, 15, 15);
+
+            const uniformsSun = {};
+            const uniformsMercury = {};
+            const uniformsVenus = {};
+            const uniformsEarth = {};
+            const uniformsJupiter = {};
+            const uniformsMoon = {};
+
+            function render(time) {
+                const canvas = document.getElementById("canvas");
+                canvas.width = canvas.style.width = "100%";
+                canvas.height = canvas.style.height = "99%";
+
+                twgl.resizeCanvasToDisplaySize(gl.canvas);
+                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+
+                gl.enable(gl.DEPTH_TEST);
+                gl.enable(gl.CULL_FACE);
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+                gl.clearColor(0,0,0,1);
+
+                const fov = 30 * Math.PI / 180;
+                const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+                const zNear = 0.5;
+                const zFar = 10;
+                const projection = m4.perspective(fov, aspect, zNear, zFar);
+                
+
+                const eye = [0, 0, -10];
+                const target = [0, 0, 0];
+                const up = [0, 1, 0];
+                const camera = m4.lookAt(eye, target, up);
+                const view = m4.inverse(camera);
+
+
+                const viewProjection = m4.multiply(projection, view);
+                let worldSun = m4.identity();
+                let worldMercury = m4.identity();
+                let worldVenus = m4.identity();
+                let worldEarth = m4.identity();
+                let worldJupiter = m4.identity();
+                let worldMoon = m4.identity();
+
+
+                //Translacoes para as posicoes corretas
+                worldSun = m4.translate(worldSun, [-3.2,-1.1,0]);
+                worldMercury = m4.translate(worldMercury, [-1.2,-0.7,0]);
+                worldVenus = m4.translate(worldVenus, [-0.3,-0.3,0]);
+                worldEarth = m4.translate(worldEarth, [0.7,0.1,0]);
+                worldJupiter = m4.translate(worldJupiter, [2.1,0.6,0]);
+                worldMoon = m4.translate(worldMoon, [0.25,0,0]);
+
+
+                //Uniforms sun
+                uniformsSun.u_worldViewProjection = m4.multiply(viewProjection, worldSun);
+                uniformsSun.colours = [1,1,0,1]
+
+                //Uniforms mercurio
+                uniformsMercury.u_worldViewProjection = m4.multiply(viewProjection, worldMercury);
+                uniformsMercury.colours = [0,0,0,0.5]
+
+                //uniforms venus
+                uniformsVenus.u_worldViewProjection = m4.multiply(viewProjection, worldVenus);
+                uniformsVenus.colours = [1,0.5,0,1]
+
+                //uniforms earth
+                uniformsEarth.u_worldViewProjection = m4.multiply(viewProjection, worldEarth);
+                uniformsEarth.colours = [0,0,1,1]
+
+                //uniforms jupiter
+                uniformsJupiter.u_worldViewProjection = m4.multiply(viewProjection, worldJupiter);
+                uniformsJupiter.colours = [0.7,0.25,0.12,1]
+
+                //uniforms moon
+                uniformsMoon.u_worldViewProjection = m4.multiply(viewProjection, worldMoon);
+                uniformsMoon.colours = [0,0,0,0.2]
+
+                gl.useProgram(programInfo.program);
+
+                //Colocar o sol no canvas
+                twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoSun);
+                twgl.setUniforms(programInfo, uniformsSun);
+                twgl.drawBufferInfo(gl, bufferInfoSun);
+
+                //Colocar mercurio no canvas
+                twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoMercury);
+                twgl.setUniforms(programInfo, uniformsMercury);
+                twgl.drawBufferInfo(gl, bufferInfoMercury);
+
+                //Colocar venus no canvas
+                twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoVenus);
+                twgl.setUniforms(programInfo, uniformsVenus);
+                twgl.drawBufferInfo(gl, bufferInfoVenus);
+
+                //colocar earth no canvas
+                twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoEarth);
+                twgl.setUniforms(programInfo, uniformsEarth);
+                twgl.drawBufferInfo(gl, bufferInfoEarth);
+
+                //colocar jupiter no canvas
+                twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoJupiter);
+                twgl.setUniforms(programInfo, uniformsJupiter);
+                twgl.drawBufferInfo(gl, bufferInfoJupiter);
+
+                //colocar a lua no canvas
+                twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoMoon);
+                twgl.setUniforms(programInfo, uniformsMoon);
+                twgl.drawBufferInfo(gl, bufferInfoMoon);
+
+                requestAnimationFrame(render);
+            }
+            requestAnimationFrame(render);
+        </script>
+</body>
+
+</html>
