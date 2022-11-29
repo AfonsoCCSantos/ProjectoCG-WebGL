@@ -46,12 +46,12 @@
             const gl = document.querySelector("canvas").getContext("webgl");
             const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
 
-            const earthTex = twgl.createTexture(gl, {src: "/Projeto2/earthTexture.jpg"});
-            const mercuryTex = twgl.createTexture(gl, {src: "/Projeto2/mercury.jpeg"});
-            const sunTex = twgl.createTexture(gl, {src: "/Projeto2/sunTexture.jpg"});
-            const venusTex = twgl.createTexture(gl, {src: "/Projeto2/venusTexture.jpg"});
-            const jupiterTex = twgl.createTexture(gl, {src: "/Projeto2/jupiterTexture.jpg"});
-            const moonTex = twgl.createTexture(gl, {src: "/Projeto2/moonTexture.jpg"});
+            const earthTex = twgl.createTexture(gl, {src: "earthTexture.jpg"});
+            const mercuryTex = twgl.createTexture(gl, {src: "mercury.jpeg"});
+            const sunTex = twgl.createTexture(gl, {src: "sunTexture.jpg"});
+            const venusTex = twgl.createTexture(gl, {src: "venusTexture.jpg"});
+            const jupiterTex = twgl.createTexture(gl, {src: "jupiterTexture.jpg"});
+            const moonTex = twgl.createTexture(gl, {src: "moonTexture.jpg"});
 
             const bufferInfoSun = twgl.primitives.createSphereBufferInfo(gl,1.5, 15, 20);
             const bufferInfoMercury = twgl.primitives.createSphereBufferInfo(gl,0.2, 15, 20);
@@ -96,7 +96,7 @@
                 const fov = 30 * Math.PI / 180;
                 const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
                 const zNear = 0.5;
-                const zFar = 10;
+                const zFar = 20;
                 const projection = m4.perspective(fov, aspect, zNear, zFar);
                 
 
@@ -114,39 +114,54 @@
                 let worldEarth = m4.identity();
                 let worldJupiter = m4.identity();
                 let worldMoon = m4.identity();
-
-
+                
                 //Translacoes para as posicoes corretas
-                worldSun = m4.translate(worldSun, [-3.2,-1.1,0]);
-                worldMercury = m4.translate(worldMercury, [-1.2,-0.7,0]);
-                worldVenus = m4.translate(worldVenus, [-0.3,-0.3,0]);
-                worldEarth = m4.translate(worldEarth, [0.7,0.1,0]);
-                worldJupiter = m4.translate(worldJupiter, [2.1,0.6,0]);
-                worldMoon = m4.translate(worldMoon, [0.25,0,0]);
+                worldSun = m4.translate(worldSun, [-3.2,-1.1,0]); 
+                // worldMercury = m4.translate(worldMercury, [-1.2,-0.7,0]); 
+                worldMercury = m4.translate(worldMercury, [2,0,0]);
+                // worldVenus = m4.translate(worldVenus, [-0.3,-0.3,0]);
+                worldVenus = m4.translate(worldVenus, [3,0,0]);
+                // worldEarth = m4.translate(worldEarth, [0.7,0.1,0]);
+                worldEarth = m4.translate(worldEarth, [4.5,0,0]);
+                // worldJupiter = m4.translate(worldJupiter, [2.1,0.6,0]);
+                worldJupiter = m4.translate(worldJupiter, [6,0,0]);
+                
+                let worldSunCentral = worldSun // Para os planetas rodarem a volta do sol
 
                 worldSun = m4.rotateY(worldSun, time * 0.00005);
                 worldEarth = m4.rotateY(worldEarth, time * 0.00045);
                 worldMercury = m4.rotateY(worldMercury, time * 0.0001);
                 worldVenus = m4.rotateY(worldVenus, time * 0.00025);
                 worldJupiter = m4.rotateY(worldJupiter, time * 0.00040);
+                worldMoon = m4.translate(worldMoon, [0.5,0,0]);
+
+                //Definir rotacao dos planetas em volta do sol
+                worldSunCentralMercury = m4.rotateY(worldSunCentral, time * 0.0005);
+                worldSunCentralVenus = m4.rotateY(worldSunCentral, time * 0.0003);
+                worldSunCentralEarth = m4.rotateY(worldSunCentral, time * 0.0001);
+                worldSunCentralJupiter = m4.rotateY(worldSunCentral, time * 0.00007);
 
                 //Uniforms sun
                 uniformsSun.u_worldViewProjection = m4.multiply(viewProjection, worldSun);
 
                 //Uniforms mercurio
+                worldMercury = m4.multiply(worldSunCentralMercury, worldMercury);
                 uniformsMercury.u_worldViewProjection = m4.multiply(viewProjection, worldMercury);
 
-
                 //uniforms venus
+                worldVenus = m4.multiply(worldSunCentralVenus, worldVenus);
                 uniformsVenus.u_worldViewProjection = m4.multiply(viewProjection, worldVenus);
 
                 //uniforms earth
+                worldEarth = m4.multiply(worldSunCentralEarth, worldEarth);
                 uniformsEarth.u_worldViewProjection = m4.multiply(viewProjection, worldEarth);
 
                 //uniforms jupiter
+                worldJupiter = m4.multiply(worldSunCentralJupiter, worldJupiter);
                 uniformsJupiter.u_worldViewProjection = m4.multiply(viewProjection, worldJupiter);
 
                 //uniforms moon
+                worldMoon = m4.multiply(worldEarth, worldMoon);
                 uniformsMoon.u_worldViewProjection = m4.multiply(viewProjection, worldMoon);
                 
 
