@@ -2,12 +2,12 @@
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=windows-1252">
-    <script src="D:\FCUL\3Ano\1Semestre\CG\twgl.js-master\dist\5.x\twgl-full.js"></script>
+    <script src="\twgl.js-master\dist\5.x\twgl-full.js"></script>
 </head>
 
 <body>
     <doctype html="">
-        <!--Nuno Garcia, Faculdade de Ciências, Universidade de Lisboa, 2021-->
+
         <title>Projeto</title>
 
         <canvas id="canvas" width: 100vw; height: 100vh; display: block;></canvas>
@@ -45,21 +45,38 @@
             const m4 = twgl.m4;
             const gl = document.querySelector("canvas").getContext("webgl");
             const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
-            
-            //const bufferInfo = twgl.primitives.createCylinderBufferInfo(gl, 2, 4, 10, 10);
-            const bufferInfoSun = twgl.primitives.createSphereBufferInfo(gl,1.5, 15, 15);
-            const bufferInfoMercury = twgl.primitives.createSphereBufferInfo(gl,0.2, 15, 15);
-            const bufferInfoVenus = twgl.primitives.createSphereBufferInfo(gl, 0.3, 15, 15);
-            const bufferInfoEarth = twgl.primitives.createSphereBufferInfo(gl, 0.37, 15, 15);
-            const bufferInfoJupiter = twgl.primitives.createSphereBufferInfo(gl, 0.6, 15, 15);
+
+            const earthTex = twgl.createTexture(gl, {src: "/Projeto2/earthTexture.jpg"});
+            const mercuryTex = twgl.createTexture(gl, {src: "/Projeto2/mercury.jpeg"});
+            const sunTex = twgl.createTexture(gl, {src: "/Projeto2/sunTexture.jpg"});
+            const venusTex = twgl.createTexture(gl, {src: "/Projeto2/venusTexture.jpg"});
+            const jupiterTex = twgl.createTexture(gl, {src: "/Projeto2/jupiterTexture.jpg"});
+            const moonTex = twgl.createTexture(gl, {src: "/Projeto2/moonTexture.jpg"});
+
+            const bufferInfoSun = twgl.primitives.createSphereBufferInfo(gl,1.5, 15, 20);
+            const bufferInfoMercury = twgl.primitives.createSphereBufferInfo(gl,0.2, 15, 20);
+            const bufferInfoVenus = twgl.primitives.createSphereBufferInfo(gl, 0.3, 15, 20);
+            const bufferInfoEarth = twgl.primitives.createSphereBufferInfo(gl, 0.37, 15, 20);
+            const bufferInfoJupiter = twgl.primitives.createSphereBufferInfo(gl, 0.6, 15, 20);
             const bufferInfoMoon = twgl.primitives.createSphereBufferInfo(gl, 0.05, 15, 15);
 
             const uniformsSun = {};
+            uniformsSun.textura = sunTex;
+
             const uniformsMercury = {};
+            uniformsMercury.textura = mercuryTex;
+
             const uniformsVenus = {};
+            uniformsVenus.textura = venusTex;
+
             const uniformsEarth = {};
+            uniformsEarth.textura = earthTex;
+
             const uniformsJupiter = {};
+            uniformsJupiter.textura = jupiterTex;
+
             const uniformsMoon = {};
+            uniformsMoon.textura = moonTex;
 
             function render(time) {
                 const canvas = document.getElementById("canvas");
@@ -107,30 +124,31 @@
                 worldJupiter = m4.translate(worldJupiter, [2.1,0.6,0]);
                 worldMoon = m4.translate(worldMoon, [0.25,0,0]);
 
+                worldSun = m4.rotateY(worldSun, time * 0.00005);
+                worldEarth = m4.rotateY(worldEarth, time * 0.00045);
+                worldMercury = m4.rotateY(worldMercury, time * 0.0001);
+                worldVenus = m4.rotateY(worldVenus, time * 0.00025);
+                worldJupiter = m4.rotateY(worldJupiter, time * 0.00040);
 
                 //Uniforms sun
                 uniformsSun.u_worldViewProjection = m4.multiply(viewProjection, worldSun);
-                uniformsSun.colours = [1,1,0,1]
 
                 //Uniforms mercurio
                 uniformsMercury.u_worldViewProjection = m4.multiply(viewProjection, worldMercury);
-                uniformsMercury.colours = [0,0,0,0.5]
+
 
                 //uniforms venus
                 uniformsVenus.u_worldViewProjection = m4.multiply(viewProjection, worldVenus);
-                uniformsVenus.colours = [1,0.5,0,1]
 
                 //uniforms earth
                 uniformsEarth.u_worldViewProjection = m4.multiply(viewProjection, worldEarth);
-                uniformsEarth.colours = [0,0,1,1]
 
                 //uniforms jupiter
                 uniformsJupiter.u_worldViewProjection = m4.multiply(viewProjection, worldJupiter);
-                uniformsJupiter.colours = [0.7,0.25,0.12,1]
 
                 //uniforms moon
                 uniformsMoon.u_worldViewProjection = m4.multiply(viewProjection, worldMoon);
-                uniformsMoon.colours = [0,0,0,0.2]
+                
 
                 gl.useProgram(programInfo.program);
 
