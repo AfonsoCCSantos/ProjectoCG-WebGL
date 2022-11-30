@@ -140,7 +140,7 @@ void main() {
     uniforms.u_world = world;
     uniforms.u_worldInverseTranspose = m4.transpose(m4.inverse(world));
     uniforms.u_worldViewProjection = m4.multiply(viewProjection, world);
-
+    
     gl.useProgram(programInfo.program);
     twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
     twgl.setUniforms(programInfo, uniforms);

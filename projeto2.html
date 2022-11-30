@@ -13,35 +13,77 @@
         <canvas id="canvas" width: 100vw; height: 100vh; display: block;></canvas>
         <script id="vs" type="notjs">
             uniform mat4 u_worldViewProjection;
-            uniform vec4 colours;
+            uniform vec3 u_lightWorldPos;
+            uniform mat4 u_world;
+            uniform mat4 u_viewInverse;
+            uniform mat4 u_worldInverseTranspose;
             
             attribute vec4 position;
+            attribute vec3 normal;
             attribute vec2 texcoord;
 
-            varying vec4 vcolor;
+            varying vec4 v_position;
             varying vec2 v_texCoord;
+            varying vec3 v_normal;
+            varying vec3 v_surfaceToLight;
+            varying vec3 v_surfaceToView;
             
             void main() {
-              gl_Position = u_worldViewProjection * position;
-              vcolor = colours;
-              v_texCoord = texcoord;
+                v_texCoord = texcoord;
+                v_position = u_worldViewProjection * position;
+                v_normal = (u_worldInverseTranspose * vec4(normal, 0)).xyz;
+                v_surfaceToLight = u_lightWorldPos - (u_world*position).xyz;
+                v_surfaceToView = (u_viewInverse[3] - (u_world * position)).xyz;
+                gl_Position = v_position;
             }
             
       </script>
         <script id="fs" type="notjs">
             precision mediump float;
+
             varying vec4 vcolor;
             varying vec2 v_texCoord;
-            uniform sampler2D textura;
+            varying vec4 v_position;
+            varying vec3 v_normal;
+            varying vec3 v_surfaceToLight;
+            varying vec3 v_surfaceToView;
+
+            uniform vec4 u_lightColor;
+            uniform vec4 u_ambient;
+            uniform sampler2D u_diffuse;
+            uniform vec4 u_specular;
+            uniform float u_shininess;
+            uniform float u_specularFactor;
+
+            vec4 lit(float l ,float h, float m) {
+                return vec4(1.0,
+                            max(l, 0.0),
+                            (l > 0.0) ? pow(max(0.0, h), m) : 0.0,
+                            1.0);
+              //   return vec4(ambient, diffuse, specular, 1.0);
+            }
             
             void main() {
-             //gl_FragColor = vec4(1, 1, 0, 1);
-            gl_FragColor = texture2D(textura, v_texCoord);
+                vec4 diffuseColor = texture2D(u_diffuse, v_texCoord);
+                vec3 a_normal = normalize(v_normal);
+                vec3 surfaceToLight = normalize(v_surfaceToLight);
+                vec3 surfaceToView = normalize(v_surfaceToView);
+
+                vec3 halfVector = normalize(surfaceToLight+surfaceToView);
+
+                vec4 litR = lit(dot(a_normal, surfaceToLight),
+                    dot(a_normal, halfVector), u_shininess);
+
+                vec4 outColor = vec4((
+                    u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient +
+                        u_specular * litR.z * u_specularFactor)).rgb,
+                        diffuseColor.a);
+
+                gl_FragColor = outColor;
             }
       
       </script>
         <script>
-            //ADICIONAR O LINK PARA AS TEXTURAS
             const m4 = twgl.m4;
             const gl = document.querySelector("canvas").getContext("webgl");
             const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
@@ -60,25 +102,67 @@
             const bufferInfoJupiter = twgl.primitives.createSphereBufferInfo(gl, 0.6, 15, 20);
             const bufferInfoMoon = twgl.primitives.createSphereBufferInfo(gl, 0.05, 15, 15);
             
-            const uniformsSun = {};
-            uniformsSun.textura = sunTex;
+            const uniformsSun = {
+                u_lightWorldPos: [1, 8, -10],
+                u_lightColor: [1, 0.8, 0.8, 1],
+                u_ambient: [0, 0, 0, 1],
+                u_specular: [1, 1, 1, 1],
+                u_shininess: 50,
+                u_specularFactor: 1,
+                u_diffuse: sunTex,
+            };
 
             //u_lightWorldPos: [1, 8, -10],
 
-            const uniformsMercury = {};
-            uniformsMercury.textura = mercuryTex;
+            const uniformsMercury = {
+                u_lightWorldPos: [1, 8, -10],
+                u_lightColor: [1, 0.8, 0.8, 1],
+                u_ambient: [0, 0, 0, 1],
+                u_specular: [1, 1, 1, 1],
+                u_shininess: 50,
+                u_specularFactor: 1,
+                u_diffuse: mercuryTex,
+            };
 
-            const uniformsVenus = {};
-            uniformsVenus.textura = venusTex;
+            const uniformsVenus = {
+                u_lightWorldPos: [1, 8, -10],
+                u_lightColor: [1, 0.8, 0.8, 1],
+                u_ambient: [0, 0, 0, 1],
+                u_specular: [1, 1, 1, 1],
+                u_shininess: 50,
+                u_specularFactor: 1,
+                u_diffuse: venusTex,
+            };
 
-            const uniformsEarth = {};
-            uniformsEarth.textura = earthTex;
+            const uniformsEarth = {
+                u_lightWorldPos: [1, 8, -10],
+                u_lightColor: [1, 0.8, 0.8, 1],
+                u_ambient: [0, 0, 0, 1],
+                u_specular: [1, 1, 1, 1],
+                u_shininess: 50,
+                u_specularFactor: 1,
+                u_diffuse: earthTex,
+            };
 
-            const uniformsJupiter = {};
-            uniformsJupiter.textura = jupiterTex;
+            const uniformsJupiter = {
+                u_lightWorldPos: [1, 8, -10],
+                u_lightColor: [1, 0.8, 0.8, 1],
+                u_ambient: [0, 0, 0, 1],
+                u_specular: [1, 1, 1, 1],
+                u_shininess: 50,
+                u_specularFactor: 1,
+                u_diffuse: jupiterTex,
+            };
 
-            const uniformsMoon = {};
-            uniformsMoon.textura = moonTex;
+            const uniformsMoon = {
+                u_lightWorldPos: [1, 8, -10],
+                u_lightColor: [1, 0.8, 0.8, 1],
+                u_ambient: [0, 0, 0, 1],
+                u_specular: [1, 1, 1, 1],
+                u_shininess: 50,
+                u_specularFactor: 1,
+                u_diffuse: moonTex,
+            };
 
             function render(time) {
                 const canvas = document.getElementById("canvas");
@@ -138,10 +222,12 @@
                 let worldSunCentralVenus = m4.rotateY(worldSunCentral, time * 0.0003);
                 let worldSunCentralEarth = m4.rotateY(worldSunCentral, time * 0.0001);
                 let worldSunCentralJupiter = m4.rotateY(worldSunCentral, time * 0.00007);
-                
+
                 //Uniforms sun
-                uniformsSun.u_worldViewProjection = m4.multiply(viewProjection, worldSun);
+                uniformsSun.u_viewInverse = camera;
                 uniformsSun.u_world = worldSun;
+                uniformsSun.u_worldInverseTranspose = m4.transpose(m4.inverse(worldSun));
+                uniformsSun.u_worldViewProjection = m4.multiply(viewProjection, worldSun);
                 
                 //Uniforms mercurio
                 worldMercury = m4.multiply(worldSunCentralMercury, worldMercury);
