@@ -103,9 +103,9 @@
             const bufferInfoMoon = twgl.primitives.createSphereBufferInfo(gl, 0.05, 15, 15);
             
             const uniformsSun = {
-                u_lightWorldPos: [1, 8, -10],
-                u_lightColor: [1, 0.8, 0.8, 1],
-                u_ambient: [0, 0, 0, 1],
+                u_lightWorldPos: [0, 0, 0],
+                u_lightColor: [1, 1, 1, 1],
+                u_ambient: [1, 1, 1, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
                 u_specularFactor: 1,
@@ -115,8 +115,8 @@
             //u_lightWorldPos: [1, 8, -10],
 
             const uniformsMercury = {
-                u_lightWorldPos: [1, 8, -10],
-                u_lightColor: [1, 0.8, 0.8, 1],
+                u_lightWorldPos:  [0, 0, 0],
+                u_lightColor: [1, 1, 1, 1],
                 u_ambient: [0, 0, 0, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
@@ -125,7 +125,7 @@
             };
 
             const uniformsVenus = {
-                u_lightWorldPos: [1, 8, -10],
+                u_lightWorldPos:  [0, 0, 0],
                 u_lightColor: [1, 0.8, 0.8, 1],
                 u_ambient: [0, 0, 0, 1],
                 u_specular: [1, 1, 1, 1],
@@ -135,8 +135,8 @@
             };
 
             const uniformsEarth = {
-                u_lightWorldPos: [1, 8, -10],
-                u_lightColor: [1, 0.8, 0.8, 1],
+                u_lightWorldPos:  [0, 0, 0],
+                u_lightColor: [1, 1, 1, 1],
                 u_ambient: [0, 0, 0, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
@@ -145,7 +145,7 @@
             };
 
             const uniformsJupiter = {
-                u_lightWorldPos: [1, 8, -10],
+                u_lightWorldPos: [0, 0, 0],
                 u_lightColor: [1, 0.8, 0.8, 1],
                 u_ambient: [0, 0, 0, 1],
                 u_specular: [1, 1, 1, 1],
@@ -155,7 +155,7 @@
             };
 
             const uniformsMoon = {
-                u_lightWorldPos: [1, 8, -10],
+                u_lightWorldPos:  [0, 0, 0],
                 u_lightColor: [1, 0.8, 0.8, 1],
                 u_ambient: [0, 0, 0, 1],
                 u_specular: [1, 1, 1, 1],
@@ -176,7 +176,7 @@
                 gl.enable(gl.CULL_FACE);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                //gl.clearColor(0,0,0,1);
+                gl.clearColor(0,0,0,1);
 
                 const fov = 30 * Math.PI / 180;
                 const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
@@ -233,21 +233,29 @@
                 worldMercury = m4.multiply(worldSunCentralMercury, worldMercury);
                 uniformsMercury.u_worldViewProjection = m4.multiply(viewProjection, worldMercury);
                 uniformsMercury.u_world = worldMercury;
+                uniformsMercury.u_worldInverseTranspose = m4.transpose(m4.inverse(worldMercury));
+                uniformsMercury.u_worldViewProjection = m4.multiply(viewProjection, worldMercury); 
                 
                 //uniforms venus
                 worldVenus = m4.multiply(worldSunCentralVenus, worldVenus);
                 uniformsVenus.u_worldViewProjection = m4.multiply(viewProjection, worldVenus);
                 uniformsVenus.u_world = worldVenus;
+                uniformsVenus.u_worldInverseTranspose = m4.transpose(m4.inverse(worldVenus));
+                uniformsVenus.u_worldViewProjection = m4.multiply(viewProjection, worldVenus);  
                 
                 //uniforms earth
                 worldEarth = m4.multiply(worldSunCentralEarth, worldEarth);
                 uniformsEarth.u_worldViewProjection = m4.multiply(viewProjection, worldEarth);
-                uniformsEarth.u_world = worldEarth;     
+                uniformsEarth.u_world = worldEarth;
+                uniformsEarth.u_worldInverseTranspose = m4.transpose(m4.inverse(worldEarth));
+                uniformsEarth.u_worldViewProjection = m4.multiply(viewProjection, worldEarth);    
                 
                 //uniforms jupiter
                 worldJupiter = m4.multiply(worldSunCentralJupiter, worldJupiter);
                 uniformsJupiter.u_worldViewProjection = m4.multiply(viewProjection, worldJupiter);
                 uniformsJupiter.u_world = worldJupiter;
+                uniformsJupiter.u_worldInverseTranspose = m4.transpose(m4.inverse(worldJupiter));
+                uniformsJupiter.u_worldViewProjection = m4.multiply(viewProjection, worldJupiter);
                 
                 //uniforms moon
                 worldEarthCentral = m4.multiply(worldSunCentralEarth, worldEarthCentral);
@@ -255,6 +263,7 @@
                 worldMoon = m4.multiply(worldEarthCentral, worldMoon);
                 uniformsMoon.u_worldViewProjection = m4.multiply(viewProjection, worldMoon);
                 uniformsMoon.u_world = worldMoon;
+                uniformsMoon.u_worldInverseTranspose = m4.transpose(m4.inverse(worldMoon));
 
                 gl.useProgram(programInfo.program);
 
