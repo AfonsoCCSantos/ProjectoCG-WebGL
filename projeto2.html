@@ -21,7 +21,7 @@
             attribute vec4 position;
             attribute vec3 normal;
             attribute vec2 texcoord;
-
+            
             varying vec4 v_position;
             varying vec2 v_texCoord;
             varying vec3 v_normal;
@@ -68,39 +68,44 @@
                 vec3 a_normal = normalize(v_normal);
                 vec3 surfaceToLight = normalize(v_surfaceToLight);
                 vec3 surfaceToView = normalize(v_surfaceToView);
-
+                
                 vec3 halfVector = normalize(surfaceToLight+surfaceToView);
 
                 vec4 litR = lit(dot(a_normal, surfaceToLight),
                     dot(a_normal, halfVector), u_shininess);
 
                 vec4 outColor = vec4((
-                    u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient +
+                    u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient + 
                         u_specular * litR.z * u_specularFactor)).rgb,
                         diffuseColor.a);
 
                 gl_FragColor = outColor;
             }
-      
-      </script>
+
+            
+        </script>
         <script>
+            document.body.style.backgroundImage = "url(milky_way.png)";
+            document.body.style.backgroundSize = "100%"
             const m4 = twgl.m4;
             const gl = document.querySelector("canvas").getContext("webgl");
             const programInfo = twgl.createProgramInfo(gl, ["vs", "fs"]);
-
+            
             const earthTex = twgl.createTexture(gl, {src: "earthTexture.jpg"});
+            const marsTex = twgl.createTexture(gl, {src: "marsTexture.jpg"});
             const mercuryTex = twgl.createTexture(gl, {src: "mercury.jpeg"});
             const sunTex = twgl.createTexture(gl, {src: "sunTexture.jpg"});
             const venusTex = twgl.createTexture(gl, {src: "venusTexture.jpg"});
             const jupiterTex = twgl.createTexture(gl, {src: "jupiterTexture.jpg"});
             const moonTex = twgl.createTexture(gl, {src: "moonTexture.jpg"});
-
-            const bufferInfoSun = twgl.primitives.createSphereBufferInfo(gl,1.5, 15, 20);
-            const bufferInfoMercury = twgl.primitives.createSphereBufferInfo(gl,0.2, 15, 20);
-            const bufferInfoVenus = twgl.primitives.createSphereBufferInfo(gl, 0.3, 15, 20);
-            const bufferInfoEarth = twgl.primitives.createSphereBufferInfo(gl, 0.37, 15, 20);
-            const bufferInfoJupiter = twgl.primitives.createSphereBufferInfo(gl, 0.6, 15, 20);
-            const bufferInfoMoon = twgl.primitives.createSphereBufferInfo(gl, 0.05, 15, 15);
+            
+            const bufferInfoSun = twgl.primitives.createSphereBufferInfo(gl,1.3, 15, 30);
+            const bufferInfoMercury = twgl.primitives.createSphereBufferInfo(gl,0.2, 15, 30);
+            const bufferInfoVenus = twgl.primitives.createSphereBufferInfo(gl, 0.3, 15, 30);
+            const bufferInfoEarth = twgl.primitives.createSphereBufferInfo(gl, 0.37, 15, 30);
+            const bufferInfoMars = twgl.primitives.createSphereBufferInfo(gl, 0.25, 15, 30);
+            const bufferInfoJupiter = twgl.primitives.createSphereBufferInfo(gl, 0.6, 15, 30);
+            const bufferInfoMoon = twgl.primitives.createSphereBufferInfo(gl, 0.05, 15, 30);
             
             const uniformsSun = {
                 u_lightWorldPos: [0, 0, 0],
@@ -113,11 +118,11 @@
             };
 
             //u_lightWorldPos: [1, 8, -10],
-
+            
             const uniformsMercury = {
                 u_lightWorldPos:  [0, 0, 0],
                 u_lightColor: [1, 1, 1, 1],
-                u_ambient: [0, 0, 0, 1],
+                u_ambient: [0.15, 0.15, 0.15, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
                 u_specularFactor: 1,
@@ -127,7 +132,7 @@
             const uniformsVenus = {
                 u_lightWorldPos:  [0, 0, 0],
                 u_lightColor: [1, 0.8, 0.8, 1],
-                u_ambient: [0, 0, 0, 1],
+                u_ambient: [0.15, 0.15, 0.15, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
                 u_specularFactor: 1,
@@ -137,38 +142,47 @@
             const uniformsEarth = {
                 u_lightWorldPos:  [0, 0, 0],
                 u_lightColor: [1, 1, 1, 1],
-                u_ambient: [0, 0, 0, 1],
+                u_ambient: [0.15, 0.15, 0.15, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
                 u_specularFactor: 1,
                 u_diffuse: earthTex,
             };
 
+            const uniformsMars = {
+                u_lightWorldPos:  [0, 0, 0],
+                u_lightColor: [1, 1, 1, 1],
+                u_ambient: [0.15, 0.15, 0.15, 1],
+                u_specular: [1, 1, 1, 1],
+                u_shininess: 50,
+                u_specularFactor: 1,
+                u_diffuse: marsTex,
+            };
+
             const uniformsJupiter = {
                 u_lightWorldPos: [0, 0, 0],
                 u_lightColor: [1, 0.8, 0.8, 1],
-                u_ambient: [0, 0, 0, 1],
+                u_ambient: [0.15, 0.15, 0.15, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
                 u_specularFactor: 1,
                 u_diffuse: jupiterTex,
             };
-
             const uniformsMoon = {
-                u_lightWorldPos:  [0, 0, 0],
+                u_lightWorldPos: [0, 0, 0],
                 u_lightColor: [1, 0.8, 0.8, 1],
-                u_ambient: [0, 0, 0, 1],
-                u_specular: [1, 1, 1, 1],
+                u_ambient: [0.15, 0.15, 0.15, 1],
+                u_specular: [0.15, 0.15, 0.15, 1],
                 u_shininess: 50,
                 u_specularFactor: 1,
                 u_diffuse: moonTex,
             };
-
+            
             function render(time) {
                 const canvas = document.getElementById("canvas");
                 canvas.width = canvas.style.width = "100%";
                 canvas.height = canvas.style.height = "99%";
-
+                
                 twgl.resizeCanvasToDisplaySize(gl.canvas);
                 gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -176,21 +190,19 @@
                 gl.enable(gl.CULL_FACE);
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-                gl.clearColor(0,0,0,1);
-
+                //gl.clearColor(0,0,0,1);
+                
                 const fov = 30 * Math.PI / 180;
                 const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
                 const zNear = 0.5;
                 const zFar = 20;
                 const projection = m4.perspective(fov, aspect, zNear, zFar);
                 
-
-                const eye = [0, 0, -10];
+                const eye = [0, 15, -1];
                 const target = [0, 0, 0];
                 const up = [0, 1, 0];
                 const camera = m4.lookAt(eye, target, up);
                 const view = m4.inverse(camera);
-
 
                 const viewProjection = m4.multiply(projection, view);
                 let worldSun = m4.identity();
@@ -199,13 +211,15 @@
                 let worldEarth = m4.identity();
                 let worldJupiter = m4.identity();
                 let worldMoon = m4.identity();
+                let worldMars = m4.identity();
                 
                 //Translacoes para as posicoes corretas
 
-                worldMercury = m4.translate(worldMercury, [2,0,0]);
-                worldVenus = m4.translate(worldVenus, [3,0,0]);
-                worldEarth = m4.translate(worldEarth, [4.5,0,0]);
-                worldJupiter = m4.translate(worldJupiter, [6,0,0]);
+                worldMercury = m4.translate(worldMercury, [1.8,0,0]);
+                worldVenus = m4.translate(worldVenus, [2.5,0,0]);
+                worldEarth = m4.translate(worldEarth, [3.5,0,0]);
+                worldMars = m4.translate(worldMars, [4.4,0,0]);
+                worldJupiter = m4.translate(worldJupiter, [5.5,0,0]);
                 
                 let worldSunCentral = worldSun; //Para os planetas rodarem a volta do sol
                 let worldEarthCentral = worldEarth; //Para a lua rodar a volta do sol
@@ -214,13 +228,15 @@
                 worldMercury = m4.rotateY(worldMercury, time * 0.000025);
                 worldVenus = m4.rotateY(worldVenus, time * 0.00001);
                 worldEarth = m4.rotateY(worldEarth, time * 0.0001);
+                worldMars = m4.rotateY(worldMars, time * 0.0001);
                 worldJupiter = m4.rotateY(worldJupiter, time * 0.0002);
                 worldMoon = m4.translate(worldMoon, [0.5,0,0]);
 
                 //Definir rotacao dos planetas em volta do sol
-                let worldSunCentralMercury = m4.rotateY(worldSunCentral, time * 0.0005);
-                let worldSunCentralVenus = m4.rotateY(worldSunCentral, time * 0.0003);
-                let worldSunCentralEarth = m4.rotateY(worldSunCentral, time * 0.0001);
+                let worldSunCentralMercury = m4.rotateY(worldSunCentral, time * 0.00045);
+                let worldSunCentralVenus = m4.rotateY(worldSunCentral, time * 0.0002);
+                let worldSunCentralEarth = m4.rotateY(worldSunCentral, time * 0.00012);
+                let worldSunCentralMars = m4.rotateY(worldSunCentral, time * 0.0001);
                 let worldSunCentralJupiter = m4.rotateY(worldSunCentral, time * 0.00007);
 
                 //Uniforms sun
@@ -249,6 +265,13 @@
                 uniformsEarth.u_world = worldEarth;
                 uniformsEarth.u_worldInverseTranspose = m4.transpose(m4.inverse(worldEarth));
                 uniformsEarth.u_worldViewProjection = m4.multiply(viewProjection, worldEarth);    
+
+                //uniforms mars
+                worldMars = m4.multiply(worldSunCentralMars, worldMars);
+                uniformsMars.u_worldViewProjection = m4.multiply(viewProjection, worldMars);
+                uniformsMars.u_world = worldMars;
+                uniformsMars.u_worldInverseTranspose = m4.transpose(m4.inverse(worldMars));
+                uniformsMars.u_worldViewProjection = m4.multiply(viewProjection, worldMars);  
                 
                 //uniforms jupiter
                 worldJupiter = m4.multiply(worldSunCentralJupiter, worldJupiter);
@@ -264,9 +287,9 @@
                 uniformsMoon.u_worldViewProjection = m4.multiply(viewProjection, worldMoon);
                 uniformsMoon.u_world = worldMoon;
                 uniformsMoon.u_worldInverseTranspose = m4.transpose(m4.inverse(worldMoon));
-
+                
                 gl.useProgram(programInfo.program);
-
+                
                 //Colocar o sol no canvas
                 twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoSun);
                 twgl.setUniforms(programInfo, uniformsSun);
@@ -286,6 +309,11 @@
                 twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoEarth);
                 twgl.setUniforms(programInfo, uniformsEarth);
                 twgl.drawBufferInfo(gl, bufferInfoEarth);
+
+                //colocar marte no canvas
+                twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoMars);
+                twgl.setUniforms(programInfo, uniformsMars);
+                twgl.drawBufferInfo(gl, bufferInfoMars);
 
                 //colocar jupiter no canvas
                 twgl.setBuffersAndAttributes(gl, programInfo, bufferInfoJupiter);
