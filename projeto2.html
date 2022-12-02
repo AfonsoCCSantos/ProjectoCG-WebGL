@@ -177,6 +177,26 @@
                 u_specularFactor: 1,
                 u_diffuse: moonTex,
             };
+
+            let fov = 30 * Math.PI / 180;
+            const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+            const zNear = 0.5;
+            const zFar = 20;
+            let projection = m4.perspective(fov, aspect, zNear, zFar);
+            
+            const eye = [0, 15, -1];
+            const target = [0, 0, 0];
+            const up = [0, 1, 0];
+            const camera = m4.lookAt(eye, target, up);
+            const view = m4.inverse(camera);
+
+            let viewProjection = m4.multiply(projection, view);
+
+            addEventListener('wheel', (event) => {
+                fov += event.deltaY * 0.001;
+                projection = m4.perspective(fov, aspect, zNear, zFar);
+                viewProjection = m4.multiply(projection, view);
+            });
             
             function render(time) {
                 const canvas = document.getElementById("canvas");
@@ -192,19 +212,6 @@
 
                 //gl.clearColor(0,0,0,1);
                 
-                const fov = 30 * Math.PI / 180;
-                const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-                const zNear = 0.5;
-                const zFar = 20;
-                const projection = m4.perspective(fov, aspect, zNear, zFar);
-                
-                const eye = [0, 15, -1];
-                const target = [0, 0, 0];
-                const up = [0, 1, 0];
-                const camera = m4.lookAt(eye, target, up);
-                const view = m4.inverse(camera);
-
-                const viewProjection = m4.multiply(projection, view);
                 let worldSun = m4.identity();
                 let worldMercury = m4.identity();
                 let worldVenus = m4.identity();
