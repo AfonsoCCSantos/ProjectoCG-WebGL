@@ -17,7 +17,7 @@
             uniform mat4 u_world;
             uniform mat4 u_viewInverse;
             uniform mat4 u_worldInverseTranspose;
-            
+
             attribute vec4 position;
             attribute vec3 normal;
             attribute vec2 texcoord;
@@ -27,6 +27,7 @@
             varying vec3 v_normal;
             varying vec3 v_surfaceToLight;
             varying vec3 v_surfaceToView;
+            
             
             void main() {
                 v_texCoord = texcoord;
@@ -41,7 +42,7 @@
         <script id="fs" type="notjs">
             precision mediump float;
 
-            varying vec4 vcolor;
+            varying vec4 v_color;
             varying vec2 v_texCoord;
             varying vec4 v_position;
             varying vec3 v_normal;
@@ -77,13 +78,12 @@
                 vec4 outColor = vec4((
                     u_lightColor * (diffuseColor * litR.y + diffuseColor * u_ambient + 
                         u_specular * litR.z * u_specularFactor)).rgb,
-                        diffuseColor.a);
-
+                        diffuseColor.a); //aqui
+                
                 gl_FragColor = outColor;
             }
-
             
-        </script>
+      </script>
         <script>
             document.body.style.backgroundImage = "url(milky_way.png)";
             document.body.style.backgroundSize = "100%"
@@ -116,8 +116,6 @@
                 u_specularFactor: 1,
                 u_diffuse: sunTex,
             };
-
-            //u_lightWorldPos: [1, 8, -10],
             
             const uniformsMercury = {
                 u_lightWorldPos:  [0, 0, 0],
@@ -131,7 +129,7 @@
 
             const uniformsVenus = {
                 u_lightWorldPos:  [0, 0, 0],
-                u_lightColor: [1, 0.8, 0.8, 1],
+                u_lightColor: [1, 1, 1, 1],
                 u_ambient: [0.15, 0.15, 0.15, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
@@ -161,7 +159,7 @@
 
             const uniformsJupiter = {
                 u_lightWorldPos: [0, 0, 0],
-                u_lightColor: [1, 0.8, 0.8, 1],
+                u_lightColor: [1, 1, 1, 1],
                 u_ambient: [0.15, 0.15, 0.15, 1],
                 u_specular: [1, 1, 1, 1],
                 u_shininess: 50,
@@ -181,14 +179,14 @@
             let fov = 30 * Math.PI / 180;
             const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
             const zNear = 0.5;
-            const zFar = 20;
+            const zFar = 40;
             let projection = m4.perspective(fov, aspect, zNear, zFar);
             
-            const eye = [0, 15, -1];
-            const target = [0, 0, 0];
-            const up = [0, 1, 0];
-            const camera = m4.lookAt(eye, target, up);
-            const view = m4.inverse(camera);
+            let eye = [0, 0, -10];
+            let target = [0, 0, 0];
+            let up = [0, 1, 0];
+            let camera = m4.lookAt(eye, target, up);
+            let view = m4.inverse(camera);
 
             let viewProjection = m4.multiply(projection, view);
 
@@ -197,6 +195,44 @@
                 projection = m4.perspective(fov, aspect, zNear, zFar);
                 viewProjection = m4.multiply(projection, view);
             });
+            
+
+            let mouseDown
+            let mouseX = 0
+            let mouseY = 0
+            addEventListener('mousemove', event =>{
+                mouseX = event.movementX
+                mouseY = event.movementY
+                // console.log(event.movementX)
+            })
+            addEventListener('mousedown', event =>{
+                mouseDown = true
+            })
+            addEventListener('mouseup', event => {
+                mouseDown = false
+            })
+
+            let max = (n1,n2) => n1 > n2 ? n1 : n2
+
+            var intervalId = window.setInterval(() => {
+                if(mouseDown) {
+                    newX = eye[0] + mouseX * 0.1
+                    newX = newX < 10 ? newX : 10
+                    newX = newX > -10 ? newX : -10
+                    newY = eye[1]+ mouseY * 0.1
+                    newY = newY < 10 ? newY : 10
+                    newY = newY > -10 ? newY : -10
+                    newZ = eye[2] < 10 ? eye[2] : 10
+                    newZ = newZ>-10 ? newZ : -10
+                    console.log(newZ)
+                    eye = [newX , newY, newZ];
+                    camera = m4.lookAt(eye, target, up);
+                    view = m4.inverse(camera);
+                    viewProjection = m4.multiply(projection, view);
+                    mouseX = 0
+                    mouseY = 0
+                }
+            }, 0);
             
             function render(time) {
                 const canvas = document.getElementById("canvas");
